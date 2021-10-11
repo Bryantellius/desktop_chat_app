@@ -78,6 +78,7 @@ class Motd extends React.Component {
 const mapStateToProps = (state, props) => ({
   home: state.home,
 });
+
 const mapDispatch = { changeMessage };
 
 export default connect(mapStateToProps, mapDispatch)(Motd);

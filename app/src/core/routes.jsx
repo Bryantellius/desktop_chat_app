@@ -22,7 +22,9 @@ const UndoRedo = loadable(() =>
   import(/* webpackChunkName: "UndoRedoChunk" */ "Pages/undoredo/undoredo")
 );
 const ContextMenu = loadable(() =>
-  import(/* webpackChunkName: "ContextMenuChunk" */ "Pages/contextmenu/contextmenu")
+  import(
+    /* webpackChunkName: "ContextMenuChunk" */ "Pages/contextmenu/contextmenu"
+  )
 );
 
 class Routes extends React.Component {

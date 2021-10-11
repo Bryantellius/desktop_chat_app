@@ -102,7 +102,9 @@ class UndoRedo extends React.Component {
                       <button className="button is-primary" onClick={this.dec}>
                         Decrement
                       </button>
-                      <button className="button is-primary ml-2" onClick={this.inc}>
+                      <button
+                        className="button is-primary ml-2"
+                        onClick={this.inc}>
                         Increment
                       </button>
                     </div>
@@ -159,9 +161,7 @@ class UndoRedo extends React.Component {
                   <button className="button is-info" onClick={this.clear}>
                     Clear
                   </button>
-                  <button
-                    className="button is-info"
-                    onClick={this.groupbegin}>
+                  <button className="button is-info" onClick={this.groupbegin}>
                     Group begin
                   </button>
                   <button className="button is-info" onClick={this.groupend}>
@@ -176,11 +176,12 @@ class UndoRedo extends React.Component {
                   {JSON.stringify(this.props.present, null, 2)}
                 </pre>
               </div>
-              <strong>Undo/Redo state information</strong><br/>
+              <strong>Undo/Redo state information</strong>
+              <br />
               <span>Past length: {this.props.past.length}</span>
               <br />
               <span>Future length: {this.props.future.length}</span>
-            </div>            
+            </div>
           </div>
         </section>
       </React.Fragment>
@@ -195,6 +196,7 @@ const mapStateToProps = (state, props) => ({
   present: state.undoable.present,
   future: state.undoable.future,
 });
+
 const mapDispatch = {
   increment,
   decrement,

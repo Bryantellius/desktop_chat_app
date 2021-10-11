@@ -8,7 +8,7 @@ class Welcome extends React.Component {
       <React.Fragment>
         <section className="section">
           <div className="container">
-            <section className="hero is-info">
+            <section className="hero is-primary">
               <div className="hero-body">
                 <p className="title">
                   Thank you for trying out the secure-electron-template!
