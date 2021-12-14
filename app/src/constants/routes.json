@@ -1,7 +1,7 @@
 {
   "WELCOME": "/",
   "ABOUT": "/about",
-  "MOTD": "/motd",
+  "CHATAPP": "/chatapp",
   "LOCALIZATION": "/localization",
   "UNDOREDO": "/undoredo",
   "CONTEXTMENU": "/contextmenu"

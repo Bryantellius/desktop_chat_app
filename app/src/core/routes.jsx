@@ -10,8 +10,8 @@ const Welcome = loadable(() =>
 const About = loadable(() =>
   import(/* webpackChunkName: "AboutChunk" */ "Pages/about/about")
 );
-const Motd = loadable(() =>
-  import(/* webpackChunkName: "MotdChunk" */ "Pages/motd/motd")
+const ChatApp = loadable(() =>
+  import(/* webpackChunkName: "ChatAppChunk" */ "Pages/chatapp/chatapp")
 );
 const Localization = loadable(() =>
   import(
@@ -33,7 +33,7 @@ class Routes extends React.Component {
       <Switch>
         <Route exact path={ROUTES.WELCOME} component={Welcome}></Route>
         <Route path={ROUTES.ABOUT} component={About}></Route>
-        <Route path={ROUTES.MOTD} component={Motd}></Route>
+        <Route path={ROUTES.CHATAPP} component={ChatApp}></Route>
         <Route path={ROUTES.LOCALIZATION} component={Localization}></Route>
         <Route path={ROUTES.UNDOREDO} component={UndoRedo}></Route>
         <Route path={ROUTES.CONTEXTMENU} component={ContextMenu}></Route>

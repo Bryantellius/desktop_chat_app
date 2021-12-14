@@ -210,8 +210,8 @@ class Nav extends React.Component {
               <div className="navbar-dropdown">
                 <a
                   className="navbar-item"
-                  onClick={() => this.navigate(ROUTES.MOTD)}>
-                  Using the Electron store
+                  onClick={() => this.navigate(ROUTES.CHATAPP)}>
+                  Chat App
                 </a>
                 <a
                   className="navbar-item"
