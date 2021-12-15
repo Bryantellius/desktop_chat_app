@@ -10,67 +10,58 @@ class ChatApp extends React.Component {
   constructor(props) {
     super(props);
 
+    this.socket;
+    this.timer;
+
     this.state = {
-      messages: [],
+      status: "disconnected",
+      running: false,
+      time: 0,
     };
 
-    this.addMessage = this.addMessage.bind(this);
-    this.sendMessage = this.sendMessage.bind(this);
-    this.onSubmitMessage = this.onSubmitMessage.bind(this);
+    this.startTime = this.startTime.bind(this);
+    this.stopTime = this.stopTime.bind(this);
+    this.resetTime = this.resetTime.bind(this);
   }
 
   componentDidMount() {
     // Request so that the main process can use the store
     // window.api.store.send(useConfigInMainRequest);
 
-    fetch("http://localhost:3001/messages")
-      .then((res) => res.json())
-      .then((data) => this.setState({ messages: data }))
-      .catch((err) => alert(err.message));
+    this.socket = io("http://localhost:3001", { reconnect: true });
 
-    let socket = io("http://localhost:3001", { reconnect: true });
-
-    socket.on("connect", () => {
-      console.log(socket.id);
+    this.socket.on("connect", () => {
+      console.log(this.socket.id);
+      this.setState({ status: "connected" });
     });
 
-    socket.on("disconnect", () => {
-      console.log(socket.id);
+    this.socket.on("disconnect", () => {
+      console.log(this.socket.id);
+      this.setState({ status: "disconnected" });
     });
-
-    socket.on("message", this.addMessage);
   }
 
-  addMessage(message) {
-    this.setState({ messages: [message, ...this.state.messages] });
+  componentWillUnmount() {
+    clearInterval(this.timer);
   }
 
-  sendMessage(message) {
-    fetch("http://localhost:3001/messages", {
-      mode: "cors",
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(message),
-    })
-      .then((res) => res.json())
-      .then((res) => {
-        this.addMessage(message);
-        alert(res.message);
-      })
-      .catch((err) => alert(err.message));
+  startTime() {
+    this.setState({ running: true });
+
+    this.timer = setInterval(() => {
+      this.setState({ time: this.state.time + 1 });
+      this.socket.emit("time-increment", this.state.time);
+    }, 100);
   }
 
-  onSubmitMessage(event) {
-    event.preventDefault(); // prevent navigation
+  resetTime() {
+    this.stopTime();
+    this.setState({ time: 0 });
+  }
 
-    let content = document.getElementById("message");
-    let author = document.getElementById("author");
-
-    this.sendMessage({ name: author.value, message: content.value });
-
-    // reset
-    content.value = "";
-    author.value = "";
+  stopTime() {
+    this.setState({ running: false });
+    clearInterval(this.timer);
   }
 
   render() {
@@ -78,38 +69,37 @@ class ChatApp extends React.Component {
       <React.Fragment>
         <section className="section">
           <div className="container has-text-centered">
-            <h1 className="title is-1">Chatter</h1>
-            <div className="subtitle">v1.0.0</div>
+            <h1 className="title is-1">Live Results</h1>
+            <div className="subtitle">{this.state.time}</div>
+            <div className="field is-grouped">
+              <div className="control">
+                <button
+                  disabled={this.state.running}
+                  className={`button is-link`}
+                  onClick={this.startTime}>
+                  Start
+                </button>
+              </div>
+              <div className="control">
+                <button
+                  disabled={!this.state.running}
+                  className={`button is-link is-danger`}
+                  onClick={this.stopTime}>
+                  Stop
+                </button>
+              </div>
+              <div className="control">
+                <button
+                  className={`button is-link is-dark`}
+                  onClick={this.resetTime}>
+                  Reset
+                </button>
+              </div>
+            </div>
           </div>
         </section>
         <section className="section">
-          <div className="container">
-            <form className="mb-4" onSubmit={this.onSubmitMessage}>
-              <div className="field is-horizontal">
-                <input
-                  placeholder="Hello World"
-                  id="message"
-                  className="input"
-                />
-                <input placeholder="Elmo" id="author" className="input" />
-                <input
-                  className="button is-primary"
-                  type="submit"
-                  value="Post"
-                />
-              </div>
-            </form>
-            <div id="messages">
-              {this.state.messages.map((m, idx) => {
-                return (
-                  <div key={idx}>
-                    <p>{m.message}</p>
-                    <small>{m.name}</small>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          <div className="container"></div>
         </section>
       </React.Fragment>
     );
