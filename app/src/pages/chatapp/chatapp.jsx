@@ -5,6 +5,7 @@ import {
   useConfigInMainRequest,
 } from "secure-electron-store";
 import { io } from "socket.io-client";
+import dayjs from "dayjs";
 
 class ChatApp extends React.Component {
   constructor(props) {
@@ -22,6 +23,7 @@ class ChatApp extends React.Component {
     this.startTime = this.startTime.bind(this);
     this.stopTime = this.stopTime.bind(this);
     this.resetTime = this.resetTime.bind(this);
+    this.addResult = this.addResult.bind(this);
   }
 
   componentDidMount() {
@@ -49,14 +51,24 @@ class ChatApp extends React.Component {
     this.setState({ running: true });
 
     this.timer = setInterval(() => {
-      this.setState({ time: this.state.time + 1 });
-      this.socket.emit("time-increment", this.state.time);
+      let updatedTime = this.state.time + 1;
+      this.socket.emit(
+        "time-increment",
+        dayjs()
+          .minute(0)
+          .second(updatedTime / 10)
+          .format("mm:ss")
+      );
+      this.setState({ time: updatedTime });
     }, 100);
   }
 
   resetTime() {
     this.stopTime();
-    this.setState({ time: 0 });
+    this.socket.emit("reset", dayjs().minute(0).second(0).format("mm:ss"));
+    this.setState({
+      time: 0,
+    });
   }
 
   stopTime() {
@@ -64,13 +76,43 @@ class ChatApp extends React.Component {
     clearInterval(this.timer);
   }
 
+  addResult(e) {
+    e.preventDefault();
+
+    let athleteId = document.getElementById("athleteId");
+
+    this.socket.emit("result", {
+      athlete: athleteId.value,
+      time: dayjs()
+        .minute(0)
+        .second(this.state.time / 10)
+        .format("mm:ss"),
+    });
+
+    athleteId.value = "";
+    athleteId.focus();
+  }
+
   render() {
     return (
       <React.Fragment>
         <section className="section">
           <div className="container has-text-centered">
+            <span
+              id="connectionBubble"
+              className={`tag is-${
+                this.state.status == "disconnected" ? "danger" : "success"
+              }`}>
+              {this.state.status == "disconnected" ? "Not" : ""} Connected
+            </span>
             <h1 className="title is-1">Live Results</h1>
-            <div className="subtitle">{this.state.time}</div>
+            <div className="subtitle">
+              {dayjs()
+                .hour(0)
+                .minute(0)
+                .second(this.state.time ? this.state.time / 10 : 0)
+                .format("mm:ss")}
+            </div>
             <div className="field is-grouped">
               <div className="control">
                 <button
@@ -96,6 +138,22 @@ class ChatApp extends React.Component {
                 </button>
               </div>
             </div>
+            <hr />
+            <form className="field has-addons" onSubmit={this.addResult}>
+              <div className="control">
+                <input
+                  id="athleteId"
+                  className="input"
+                  type="number"
+                  placeholder="Athlete #"
+                />
+              </div>
+              <div className="control">
+                <button type="submit" className="button is-info">
+                  Time
+                </button>
+              </div>
+            </form>
           </div>
         </section>
         <section className="section">
