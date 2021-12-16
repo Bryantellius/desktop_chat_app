@@ -20,6 +20,7 @@ class ChatApp extends React.Component {
       time: 0,
       loadedMeet: {},
       currentRace: {},
+      results: [],
     };
 
     this.startTime = this.startTime.bind(this);
@@ -81,6 +82,7 @@ class ChatApp extends React.Component {
     this.socket.emit("reset", dayjs().minute(0).second(0).format("mm:ss"));
     this.setState({
       time: 0,
+      results: [],
     });
   }
 
@@ -114,6 +116,19 @@ class ChatApp extends React.Component {
         .format("mm:ss"),
     });
 
+    this.setState({
+      results: [
+        ...this.state.results,
+        {
+          ...athlete,
+          time: dayjs()
+            .minute(0)
+            .second(this.state.time / 10)
+            .format("mm:ss"),
+        },
+      ],
+    });
+
     athleteId.value = "";
     athleteId.focus();
   }
@@ -121,7 +136,7 @@ class ChatApp extends React.Component {
   render() {
     return (
       <React.Fragment>
-        <section className="section">
+        <section className="tile notification is-dark section">
           <div className="container has-text-centered">
             <span
               id="connectionBubble"
@@ -140,76 +155,115 @@ class ChatApp extends React.Component {
                 .second(this.state.time ? this.state.time / 10 : 0)
                 .format("mm:ss")}
             </div>
-            <div className="control has-icons-left">
-              <div className="select">
-                <select onChange={this.selectCurrentRace}>
-                  <option selected>Select a race..</option>
-                  {this.state.loadedMeet.races?.map((race, idx) => (
-                    <option key={idx} value={race.id}>
-                      {race.title}
-                    </option>
-                  ))}
-                </select>
+            <div className="columns">
+              <div className="column">
+                <div className="field is-grouped is-justify-content-center">
+                  <div className="control">
+                    <button
+                      disabled={this.state.running}
+                      className={`button is-link`}
+                      onClick={this.startTime}>
+                      Start
+                    </button>
+                  </div>
+                  <div className="control">
+                    <button
+                      disabled={!this.state.running}
+                      className={`button is-link is-danger`}
+                      onClick={this.stopTime}>
+                      Stop
+                    </button>
+                  </div>
+                  <div className="control">
+                    <button
+                      className={`button is-link is-dark`}
+                      onClick={this.resetTime}>
+                      Reset
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div className="icon is-small is-left">
-                <i className="fas fa-globe"></i>
+              <div className="column">
+                <div className="control has-icons-left">
+                  <div className="select">
+                    <select
+                      defaultValue="Select a race.."
+                      onChange={this.selectCurrentRace}>
+                      <option>Select a race..</option>
+                      {this.state.loadedMeet.races?.map((race, idx) => (
+                        <option key={idx} value={race.id}>
+                          {race.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="icon is-small is-left">
+                    <i className="fas fa-globe"></i>
+                  </div>
+                  <button
+                    className={`button is-link is-dark`}
+                    onClick={this.loadMeet}>
+                    Load
+                  </button>
+                </div>
               </div>
             </div>
-            <div className="control">
-              <button
-                className={`button is-link is-dark`}
-                onClick={this.loadMeet}>
-                Load
-              </button>
-            </div>
-            <div className="field is-grouped">
-              <div className="control">
-                <button
-                  disabled={this.state.running}
-                  className={`button is-link`}
-                  onClick={this.startTime}>
-                  Start
-                </button>
-              </div>
-              <div className="control">
-                <button
-                  disabled={!this.state.running}
-                  className={`button is-link is-danger`}
-                  onClick={this.stopTime}>
-                  Stop
-                </button>
-              </div>
-              <div className="control">
-                <button
-                  className={`button is-link is-dark`}
-                  onClick={this.resetTime}>
-                  Reset
-                </button>
-              </div>
-            </div>
-            <hr />
-            <form className="field has-addons" onSubmit={this.addResult}>
-              <div className="control">
-                <input
-                  id="athleteId"
-                  className="input"
-                  type="number"
-                  placeholder="Athlete #"
-                />
-              </div>
-              <div className="control">
-                <button
-                  type="submit"
-                  className="button is-info"
-                  disabled={!this.state.running}>
-                  Time
-                </button>
-              </div>
-            </form>
           </div>
         </section>
+        <hr />
         <section className="section">
-          <div className="container"></div>
+          <div className="container">
+            <div className="columns">
+              <div className="column">
+                <form
+                  className="field has-addons is-justify-content-center"
+                  onSubmit={this.addResult}>
+                  <div className="control">
+                    <input
+                      id="athleteId"
+                      className="input"
+                      type="number"
+                      placeholder="Athlete #"
+                    />
+                  </div>
+                  <div className="control">
+                    <button
+                      type="submit"
+                      className="button is-info"
+                      disabled={!this.state.running}>
+                      Time
+                    </button>
+                  </div>
+                </form>
+              </div>
+              <div className="column">
+                <table className="table" style={{ width: "100%" }}>
+                  <thead>
+                    <tr>
+                      <th>Pos</th>
+                      <th>Name</th>
+                      <th>Team</th>
+                      <th>Year</th>
+                      <th>Time</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {this.state.results.map((res, idx) => {
+                      return (
+                        <tr key={idx}>
+                          <td>{idx + 1}</td>
+                          <td>{res.name}</td>
+                          <td>{res.schoolAbr}</td>
+                          <td>{res.year}</td>
+                          <td>{res.time}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </section>
       </React.Fragment>
     );
